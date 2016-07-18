@@ -35,3 +35,32 @@ alone or with your friends.
 
 *   [TextAdventure.js](https://github.com/HAZARDU5/TextAdventure.js) - My fork of TextAdventure.js that has support for
     reading the game state of any user's single-player adventure using simple API
+
+## Installation
+
+Installation is manual at this time until an installer script can be created.
+
+1.  Install `mopidy` by following [these instructions](https://docs.mopidy.com/en/latest/installation/).
+
+2.  Install `mopidy-spotify` by following [these instructions](https://github.com/mopidy/mopidy-spotify#installation).
+
+3.  Edit your `mopidy` config file (`nano ~/.config/mopidy/mopidy.conf`) and add your Spotify username and password to
+    the bottom of the file:
+
+    ```
+    [spotify]
+    username = USERNAME
+    password = PASSWORD
+    ```
+
+    where `USERNAME` is your Spotify username and `PASSWORD` is your Spotify password. If you've created your Spotify
+    account using Facebook you'll need to login to your account via Facebook and
+    [create a Spotify Device password here](https://www.spotify.com/nz/account/set-device-password/).
+
+3.  If on OSX, run the following command to launch `mopidy`:
+
+    ```
+    PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
+    ```
+
+4.
