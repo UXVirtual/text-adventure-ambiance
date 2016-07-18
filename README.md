@@ -32,11 +32,20 @@ alone or with your friends.
 
 Installation is manual at this time until an installer script can be created.
 
-1.  Install `mopidy` by following [these instructions](https://docs.mopidy.com/en/latest/installation/).
+1.  If on OSX run `xcode-select --install` to install command line build tools. These are required to install `mopidy`
+    and its extensions.
 
-2.  Install `mopidy-spotify` by following [these instructions](https://github.com/mopidy/mopidy-spotify#installation).
+2.  Install `mopidy` by following [these instructions](https://docs.mopidy.com/en/latest/installation/). Be sure to set
+    the `PYTHONPATH` in your `.bash_profile` or equivalent as described in the installation instructions link or
+    the install of `mopidy-spotify` will fail below.
 
-3.  Edit your `mopidy` config file (`nano ~/.config/mopidy/mopidy.conf`) and add your Spotify username and password to
+3.  Install `mopidy-spotify` by following [these instructions](https://github.com/mopidy/mopidy-spotify#installation).
+    Note: if you have issues installing this, make sure that you don't have an alternate installation of python2.7 set
+    in your path. MAMP on OSX can cause conflicts with its version of python if the apache2 bin folder is included in
+    the PATH (e.g. `export PATH="/Applications/MAMP/bin/apache2/bin:$PATH"`). Remove this line and relaunch your
+    terminal if this is a problem.
+
+4.  Edit your `mopidy` config file (`nano ~/.config/mopidy/mopidy.conf`) and add your Spotify username and password to
     the bottom of the file:
 
     ```
@@ -51,10 +60,8 @@ Installation is manual at this time until an installer script can be created.
     *There was a problem setting your password* error when setting your Spotify password, ignore it and use the password
     you set anyway.
 
-3.  If on OSX, run the following command to launch `mopidy`:
+5.  If on OSX, run the following command to launch `mopidy`:
 
     ```
     PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
     ```
-
-4.
