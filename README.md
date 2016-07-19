@@ -28,6 +28,10 @@ alone or with your friends.
 *   [TextAdventure.js](https://github.com/HAZARDU5/TextAdventure.js) - My fork of TextAdventure.js that has support for
     reading the game state of any user's single-player adventure using simple API
 
+## References
+
+*   [Writing a JSON-RPC over TCP client for `lightsd`](http://lightsd.readthedocs.io/en/latest/protocol.html#writing-a-client-for-lightsd)
+
 ## Installation
 
 Installation is manual at this time until an installer script can be created.
@@ -52,6 +56,7 @@ Installation is manual at this time until an installer script can be created.
     [spotify]
     username = USERNAME
     password = PASSWORD
+    bitrate = 320
     ```
 
     where `USERNAME` is your Spotify username and `PASSWORD` is your Spotify password. If you've created your Spotify
@@ -60,8 +65,22 @@ Installation is manual at this time until an installer script can be created.
     *There was a problem setting your password* error when setting your Spotify password, ignore it and use the password
     you set anyway.
 
-5.  If on OSX, run the following command to launch `mopidy`:
+    See the mopidy-spotify extension [Configuration](https://github.com/mopidy/mopidy-spotify#configuration) page for
+    more information on configuring this file for Spotify.
+
+5.  Install `lightsd` by following [these instructions](http://lightsd.readthedocs.io/en/latest/installation.html).
+
+6.  If on OSX run `brew services start lopter/lightsd/lightsd` to install lightsd as a daemon so it runs in the background.
+
+## Running
+
+*  If on OSX, run the following command to launch `mopidy`. It will then be available to accept commands on port `6680`:
 
     ```
-    PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages mopidy
+    mopidy
     ```
+
+## JavaScript Library
+
+There is a [library available here](http://mopidy.readthedocs.io/en/latest/api/js/) that wraps the API and works with
+`npm`.
