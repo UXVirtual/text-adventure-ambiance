@@ -31,6 +31,8 @@ alone or with your friends.
 ## References
 
 *   [Writing a JSON-RPC over TCP client for `lightsd`](http://lightsd.readthedocs.io/en/latest/protocol.html#writing-a-client-for-lightsd)
+*   [node-jsonrpc2](https://github.com/pocesar/node-jsonrpc2) - JSON-RPC2 client supporting connections over TCP
+
 
 ## Installation
 
