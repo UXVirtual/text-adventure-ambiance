@@ -24,9 +24,9 @@ var printCurrentTrack = function (track) {
     }
 };
 
-var queueAndPlay = function (playlistName, trackNum) {
+var queueAndPlay = function (playlistName, trackName) {
     playlistName = playlistName;
-    trackNum = trackNum || 0;
+    trackName = trackName;
     mopidy.playlists.getPlaylists().then(function (playlists) {
 
         for(var i = 0; i < playlists.length; i++){
@@ -35,16 +35,32 @@ var queueAndPlay = function (playlistName, trackNum) {
                 var playlist = playlists[i];
                 console.log("Loading playlist:", playlist.name);
 
-                console.log("Tracks: ",playlist.tracks);
+                //console.log("Tracks: ",playlist.tracks);
 
                 mopidy.tracklist.clear();
 
+
                 return mopidy.tracklist.add(playlist.tracks).then(function (tlTracks) {
-                    return mopidy.playback.play(tlTracks[trackNum]).then(function () {
-                        return mopidy.playback.getCurrentTrack().then(function (track) {
-                            console.log("Now playing:", trackDesc(track));
-                        });
-                    });
+
+                    for(var x = 0; x < tlTracks.length; x++){
+                        if(tlTracks[x].track.name === trackName){
+
+                            //console.log(mopidy.tracklist);
+
+                            //return;
+
+                            mopidy.tracklist.setRepeat(true);
+                            mopidy.tracklist.setSingle(true);
+
+                            return mopidy.playback.play(tlTracks[x]).then(function () {
+                                return mopidy.playback.getCurrentTrack().then(function (track) {
+                                    console.log("Now playing:", trackDesc(track));
+                                });
+                            });
+                        }
+                    }
+
+
                 });
             }
         }
@@ -65,7 +81,7 @@ mopidy.on("state:online", function () {
     mopidy.playback.getCurrentTrack()
         .done(printCurrentTrack);
 
-    queueAndPlay('EVE Online',0);
+    queueAndPlay('EVE Online','The Radiance');
 });
 
 
