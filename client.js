@@ -90,23 +90,72 @@ mopidy.on("state:online", function () {
 //start music
 
 // ... do other stuff, like hooking up events ...
-mopidy.connect();
+//mopidy.connect();
 
 //start lights
 
-client.connect(6999, '127.0.0.1', function() {
-    console.log('Connected');
-    client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'get_light_state', params: ["*"]}));
-});
+var getLights = function(callback){
+    client.connect(6999, '127.0.0.1', function() {
+        console.log('Connected');
+        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'get_light_state', params: ["*"]}));
+    });
 
-client.on('data', function(data) {
-    console.log('Received: ' + data);
+    client.on('data', function(data) {
+        console.log('Received: ' + data);
 
-    //returns:
-    //{"jsonrpc": "2.0", "id": "JSON_RPC_ID", "result": [{"_lifx":{"addr":"LIFX_ADDR","gateway":{"site":"SITE_ID","url":"tcp://[::ffff:IP_ADDRESS]:56700","latency":0},"mcu":{"firmware_version":"1.13"},"wifi":{"firmware_version":"0.0"}},"_model":"Color 1000","_vendor":"LIFX","hsbk":[0,0,1,2750],"power":true,"label":"Kitchen Bulb","tags":[]}]}
+        var json = JSON.parse(data);
 
-    client.destroy(); // kill client after server's response
-});
+        //console.log(json.result[0]._lifx.addr);
+
+        client.destroy(); // kill client after server's response
+
+        if(typeof json.result[0] !== 'undefined' && callback){
+            var target = String(json.result[0]._lifx.addr).replace(/:/g,'');
+            callback(target);
+        }
+
+        //returns:
+        //{"jsonrpc": "2.0", "id": "JSON_RPC_ID", "result": [{"_lifx":{"addr":"LIFX_ADDR","gateway":{"site":"SITE_ID","url":"tcp://[::ffff:IP_ADDRESS]:56700","latency":0},"mcu":{"firmware_version":"1.13"},"wifi":{"firmware_version":"0.0"}},"_model":"Color 1000","_vendor":"LIFX","hsbk":[0,0,1,2750],"power":true,"label":"Kitchen Bulb","tags":[]}]}
+
+
+    });
+};
+
+var setLight = function(target){
+
+    console.log('Animating light at '+target);
+
+    client.connect(6999, '127.0.0.1', function() {
+        console.log('Connected');
+        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'set_light_from_hsbk', params: [target,232,1,0.5,9000,250]}));
+    });
+
+    client.on('data', function(data) {
+        console.log('Received: ' + data);
+
+        client.destroy(); // kill client after server's response
+
+    });
+};
+
+var animateLight = function(target){
+
+    console.log('Animating light at '+target);
+
+    client.connect(6999, '127.0.0.1', function() {
+        console.log('Connected');
+        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'set_waveform', params: [target,'SINE',50,1,0.5,9000,1000,20,0.5,true]}));
+    });
+
+    client.on('data', function(data) {
+        console.log('Received: ' + data);
+
+        client.destroy(); // kill client after server's response
+
+    });
+};
+
+getLights(animateLight);
 
 client.on('close', function() {
     console.log('Connection closed');
