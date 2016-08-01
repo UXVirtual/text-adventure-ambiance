@@ -8,6 +8,8 @@ var Mopidy = require("mopidy");
 
 var uuid = require('uuid4');
 
+var Color = require("color")
+
 var mopidy = new Mopidy({
     autoConnect: false,
     webSocketUrl: "ws://localhost:6680/mopidy/ws/"/*,
@@ -121,13 +123,17 @@ var getLights = function(callback){
     });
 };
 
-var setLight = function(target){
+var setLight = function(target,rgbColor,temperature,time){
 
     console.log('Animating light at '+target);
 
+    var hslArray = rgbColor.hslArray();
+
+    console.log(hslArray);
+
     client.connect(6999, '127.0.0.1', function() {
         console.log('Connected');
-        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'set_light_from_hsbk', params: [target,232,1,0.5,9000,250]}));
+        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'set_light_from_hsbk', params: [target,hslArray[0],hslArray[1]/100,hslArray[2]/100,temperature,time]}));
     });
 
     client.on('data', function(data) {
@@ -155,7 +161,11 @@ var animateLight = function(target){
     });
 };
 
-getLights(animateLight);
+getLights(function(target){
+    //setLight(target,Color().rgb(0, 255, 0),9000,1000);
+    //setLight(target,Color("purple"),4000,1000);
+    setLight(target,Color("white"),4000,1000);
+});
 
 client.on('close', function() {
     console.log('Connection closed');
