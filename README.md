@@ -111,7 +111,7 @@ Installation is manual at this time until an installer script can be created.
 *   On OSX, to view `lightsd` logs run the following command:
 
     ```
-    tail -F `brew --prefix`/var/log/lightsd.log`
+    tail -F `brew --prefix`/var/log/lightsd.log
     ```
 
 
