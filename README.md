@@ -32,7 +32,7 @@ alone or with your friends.
 
 *   [Writing a JSON-RPC over TCP client for `lightsd`](http://lightsd.readthedocs.io/en/latest/protocol.html#writing-a-client-for-lightsd)
 *   [node-jsonrpc2](https://github.com/pocesar/node-jsonrpc2) - JSON-RPC2 client supporting connections over TCP
-
+*   [lightsd 1.1.2 documentation](http://lightsd.readthedocs.io/en/latest/protocol.html)
 
 ## Installation
 
@@ -74,13 +74,46 @@ Installation is manual at this time until an installer script can be created.
 
 6.  If on OSX run `brew services start lopter/lightsd/lightsd` to install lightsd as a daemon so it runs in the background.
 
+7.  If on OSX, edit `/usr/local/opt/lightsd/homebrew.mxcl.lightsd.plist` and add the following to the
+    `<ProgramArguments>` key to allow `lightsd` to listen for JSON-RPC commands over TCP at this address:
+
+    ```
+    <string>-l</string>
+    <string>localhost:6999</string>
+    ```
+
+8.  If on OSX, restart `lightsd` using the following command:
+
+    ```
+    brew services restart lightsd
+    ```
+
+9.  Run the following command to check `lightsd` is running and listening on port `6999`:
+
+    ```
+    ps aux | grep lightsd
+    ```
+
 ## Running
 
-*  If on OSX, run the following command to launch `mopidy`. It will then be available to accept commands on port `6680`:
+*   If on OSX, run the following command to launch `mopidy`. It will then be available to accept commands on port `6680`:
 
     ```
     mopidy
     ```
+
+*   If on OSX, run the following command to start `lightsd`. It will then be available to accept commands on port `6999`:
+
+    ```
+    brew services start lightsd
+    ```
+
+*   On OSX, to view `lightsd` logs run the following command:
+
+    ```
+    tail -F `brew --prefix`/var/log/lightsd.log`
+    ```
+
 
 ## JavaScript Library
 
