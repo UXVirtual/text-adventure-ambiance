@@ -6,14 +6,17 @@
 
 var Mopidy = require("mopidy");
 
+var uuid = require('uuid4');
+
 var mopidy = new Mopidy({
     autoConnect: false,
     webSocketUrl: "ws://localhost:6680/mopidy/ws/"/*,
     callingConvention: 'by-position-or-by-name'*/
 });
 
-//TODO: add support for connecting to LIFX bulbs
+var net = require('net');
 
+var client = new net.Socket();
 
 var printCurrentTrack = function (track) {
     if (track) {
@@ -25,8 +28,8 @@ var printCurrentTrack = function (track) {
 };
 
 var queueAndPlay = function (playlistName, trackName) {
-    playlistName = playlistName;
-    trackName = trackName;
+    //playlistName = playlistName;
+    //trackName = trackName;
     mopidy.playlists.getPlaylists().then(function (playlists) {
 
         for(var i = 0; i < playlists.length; i++){
@@ -81,10 +84,31 @@ mopidy.on("state:online", function () {
     mopidy.playback.getCurrentTrack()
         .done(printCurrentTrack);
 
-    queueAndPlay('EVE Online','The Radiance');
+    queueAndPlay('EVE Online','Shouting Valley');
 });
 
-
+//start music
 
 // ... do other stuff, like hooking up events ...
 mopidy.connect();
+
+//start lights
+
+client.connect(6999, '127.0.0.1', function() {
+    console.log('Connected');
+    client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'get_light_state', params: ["*"]}));
+});
+
+client.on('data', function(data) {
+    console.log('Received: ' + data);
+
+    //returns:
+    //{"jsonrpc": "2.0", "id": "JSON_RPC_ID", "result": [{"_lifx":{"addr":"LIFX_ADDR","gateway":{"site":"SITE_ID","url":"tcp://[::ffff:IP_ADDRESS]:56700","latency":0},"mcu":{"firmware_version":"1.13"},"wifi":{"firmware_version":"0.0"}},"_model":"Color 1000","_vendor":"LIFX","hsbk":[0,0,1,2750],"power":true,"label":"Kitchen Bulb","tags":[]}]}
+
+    client.destroy(); // kill client after server's response
+});
+
+client.on('close', function() {
+    console.log('Connection closed');
+});
+
