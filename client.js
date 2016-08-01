@@ -6,19 +6,15 @@
 
 var Mopidy = require("mopidy");
 
-var uuid = require('uuid4');
+var Color = require("color");
 
-var Color = require("color")
+var Sequencer = require("./lib/com/uxvirtual/lightsd/sequencer");
 
 var mopidy = new Mopidy({
     autoConnect: false,
     webSocketUrl: "ws://localhost:6680/mopidy/ws/"/*,
     callingConvention: 'by-position-or-by-name'*/
 });
-
-var net = require('net');
-
-var client = new net.Socket();
 
 var printCurrentTrack = function (track) {
     if (track) {
@@ -96,78 +92,13 @@ mopidy.on("state:online", function () {
 
 //start lights
 
-var getLights = function(callback){
-    client.connect(6999, '127.0.0.1', function() {
-        console.log('Connected');
-        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'get_light_state', params: ["*"]}));
-    });
+Sequencer.getLights(function(target){
 
-    client.on('data', function(data) {
-        console.log('Received: ' + data);
+    //NOTE: see for color options: https://www.npmjs.com/package/color
 
-        var json = JSON.parse(data);
-
-        //console.log(json.result[0]._lifx.addr);
-
-        client.destroy(); // kill client after server's response
-
-        if(typeof json.result[0] !== 'undefined' && callback){
-            var target = String(json.result[0]._lifx.addr).replace(/:/g,'');
-            callback(target);
-        }
-
-        //returns:
-        //{"jsonrpc": "2.0", "id": "JSON_RPC_ID", "result": [{"_lifx":{"addr":"LIFX_ADDR","gateway":{"site":"SITE_ID","url":"tcp://[::ffff:IP_ADDRESS]:56700","latency":0},"mcu":{"firmware_version":"1.13"},"wifi":{"firmware_version":"0.0"}},"_model":"Color 1000","_vendor":"LIFX","hsbk":[0,0,1,2750],"power":true,"label":"Kitchen Bulb","tags":[]}]}
-
-
-    });
-};
-
-var setLight = function(target,rgbColor,temperature,time){
-
-    console.log('Animating light at '+target);
-
-    var hslArray = rgbColor.hslArray();
-
-    console.log(hslArray);
-
-    client.connect(6999, '127.0.0.1', function() {
-        console.log('Connected');
-        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'set_light_from_hsbk', params: [target,hslArray[0],hslArray[1]/100,hslArray[2]/100,temperature,time]}));
-    });
-
-    client.on('data', function(data) {
-        console.log('Received: ' + data);
-
-        client.destroy(); // kill client after server's response
-
-    });
-};
-
-var animateLight = function(target){
-
-    console.log('Animating light at '+target);
-
-    client.connect(6999, '127.0.0.1', function() {
-        console.log('Connected');
-        client.write(JSON.stringify({jsonrpc: "2.0", id: uuid(), method: 'set_waveform', params: [target,'SINE',50,1,0.5,9000,1000,20,0.5,true]}));
-    });
-
-    client.on('data', function(data) {
-        console.log('Received: ' + data);
-
-        client.destroy(); // kill client after server's response
-
-    });
-};
-
-getLights(function(target){
-    //setLight(target,Color().rgb(0, 255, 0),9000,1000);
+    Sequencer.setLight(target,Color().rgb(0, 255, 0).darken(0.9),9000,1000);
+    //Sequencer.animateLight(target,Color().rgb(0, 0, 255).darken(0.9),Color().rgb(255, 0, 0).darken(0.9),9000,250,'SINE',20,0.5);
     //setLight(target,Color("purple"),4000,1000);
-    setLight(target,Color("white"),4000,1000);
-});
-
-client.on('close', function() {
-    console.log('Connection closed');
+    //setLight(target,Color("white"),4000,1000);
 });
 
