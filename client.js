@@ -92,13 +92,28 @@ mopidy.on("state:online", function () {
 
 //start lights
 
-Sequencer.getLights(function(target){
+Sequencer.getLights().then(function(target){
 
     //NOTE: see for color options: https://www.npmjs.com/package/color
 
-    Sequencer.setLight(target,Color().rgb(0, 255, 0).darken(0.9),9000,1000);
-    //Sequencer.animateLight(target,Color().rgb(0, 0, 255).darken(0.9),Color().rgb(255, 0, 0).darken(0.9),9000,250,'SINE',20,0.5);
+    var colorArray = [
+        "red",
+        "green",
+        "blue",
+        "cyan",
+        "magenta",
+        "yellow",
+        "white"
+    ];
+
+    var rand = colorArray[Math.floor(Math.random() * colorArray.length)];
+
+    //Sequencer.setLight(target,Color().rgb(0, 255, 0).darken(0.9),9000,1000);
+    Sequencer.animateLight(target,Color(rand).darken(0.9),Color().rgb(255, 0, 0).darken(0.9),9000,250,'SINE',5,0.5);
     //setLight(target,Color("purple"),4000,1000);
     //setLight(target,Color("white"),4000,1000);
+
+},function(err){
+    console.log(err);
 });
 
