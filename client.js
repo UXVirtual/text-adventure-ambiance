@@ -92,7 +92,7 @@ mopidy.on("state:online", function () {
 
 //start lights
 
-Sequencer.getLights().then(function(target){
+/*Sequencer.getLights().then(function(target){
 
     //NOTE: see for color options: https://www.npmjs.com/package/color
 
@@ -109,11 +109,136 @@ Sequencer.getLights().then(function(target){
     var rand = colorArray[Math.floor(Math.random() * colorArray.length)];
 
     //Sequencer.setLight(target,Color().rgb(0, 255, 0).darken(0.9),9000,1000);
-    Sequencer.animateLight(target,Color(rand).darken(0.9),Color().rgb(255, 0, 0).darken(0.9),9000,250,'SINE',5,0.5);
+    Sequencer.animateLight(target,Color(rand).darken(0.95),Color().rgb(255, 0, 0).darken(0.9),4000,250,'SINE',5,0.5);
     //setLight(target,Color("purple"),4000,1000);
     //setLight(target,Color("white"),4000,1000);
 
 },function(err){
     console.log(err);
+});*/
+
+//NOTE: see https://github.com/ZECTBynmo/node-core-audio for information on reading sound card output buffer
+
+// Create a new instance of node-core-audio
+var coreAudio = require("node-core-audio");
+
+// Create a new audio engine
+var engine = coreAudio.createNewAudioEngine();
+
+var numDevices = engine.getNumDevices();
+
+//can only get input from mic or other input device. Would need some kind of loopback cable to get this to work -_- OR could use loopback for OSX
+var inputDeviceId;
+var outputDeviceId;
+for (var i = 0; i < numDevices; i++) {
+    var name = engine.getDeviceName(i);
+    console.log('Device #'+i+' '+name);
+    if (!inputDeviceId && /Soundflower \(2ch\)/.test(name)) {
+        inputDeviceId = i;
+    }
+
+    if (!outputDeviceId && /Built-in Output/.test(name)) {
+        outputDeviceId = i;
+    }
+}
+
+
+engine.setOptions({ inputChannels: 2, outputChannels: 2, interleaved: true, inputDevice: inputDeviceId, outputDevice: outputDeviceId }); //interleaving must be turned on to read input values
+
+// Add an audio processing callback
+// This function accepts an input buffer coming from the sound card,
+// and returns an output buffer to be sent to your speakers.
+//
+// Note: This function must return an output buffer
+/*function processAudio( inputBuffer ) {
+    console.log( "%d channels", inputBuffer.length );
+    console.log( "Channel 0 has %d samples", inputBuffer[0].length );
+
+    console.log(inputBuffer);
+
+    //don't return the inputBuffer as it'll mess up audio output
+
+    //return inputBuffer;
+}
+
+engine.addAudioCallback( processAudio );*/
+
+var sample = 0;
+var ampBuffer = new Float32Array(1);
+
+engine.addAudioCallback(function(buffer) {
+    var output = [];
+    /*for (var i = 0; i < buffer.length; i++, sample++) {
+        //console.log(buffer[i]);
+
+        //Save input into rolling buffer
+        ampBuffer[sample%ampBuffer.length] = buffer[i];
+    }*/
+
+    ampBuffer[sample%ampBuffer.length] = buffer[0];
+
+    return buffer;
 });
+
+var lastFPS = '', frames = 0, lastFrameTime = Date.now();
+
+var h = 100;
+
+Sequencer.getLights().then(function(target){
+
+    setInterval(function(){
+        /*for (var i = 0; i < ampBuffer.length; i++) {
+
+            var brightness = h / 2 + ampBuffer[i] * h / 3.0;
+
+            Sequencer.setLight(target,Color().rgb(0, 255, 0).darken(1-(brightness/100)),9000,1000).then(function(){
+
+            },function(err){
+                console.log('Error connecting to light. Skipping...');
+            });
+        }*/
+
+        //console.log(ampBuffer[0]);
+
+        if(ampBuffer.length > 0){
+            //var brightness = (h / 2 + ampBuffer[0] * h / 3.0);
+
+            console.log(Math.abs(ampBuffer[0]));
+
+            var brightness = Math.abs(ampBuffer[0]);
+
+            if(brightness > 1){
+                brightness = 1;
+            }else if(brightness < 0){
+                brightness = 0;
+            }
+
+            brightness = 1-brightness;
+
+            Sequencer.setLight(target,Color().rgb(100, 100, 100).darken(brightness),4000,1000).then(function(){
+
+            },function(err){
+                console.log('Error connecting to light. Skipping...');
+            });
+
+
+        }
+
+
+
+        /*var newTime = Date.now();
+        if (newTime - lastFrameTime > 1000) {
+            lastFPS = frames;
+            frames = 0;
+            lastFrameTime = newTime;
+        }
+
+        frames++;*/
+
+    },100);
+
+
+});
+
+
 
